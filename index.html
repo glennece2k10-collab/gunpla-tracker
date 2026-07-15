@@ -1,0 +1,1682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gunpla Collection Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+            z-index: 1;
+        }
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 2rem;
+            border: 1px solid #e5e7eb;
+        }
+        .navbar h1 {
+            color: #667eea;
+            font-size: 2.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Arial Black', 'Helvetica Bold', sans-serif;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-shadow: none;
+        }
+        .navbar-logo {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+        }
+        .navbar-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-left: auto;
+        }
+        .btn {
+            padding: 0.5rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            border: 2px solid #667eea;
+        }
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+        .btn-danger {
+            background: #ff6b6b;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #ee5a52;
+        }
+        .btn-success {
+            background: #51cf66;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #40c057;
+        }
+        .auth-form {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            max-width: 400px;
+            margin: 2rem auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            border: 1px solid #e5e7eb;
+        }
+        .login-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            align-items: center;
+            margin-top: 2rem;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .login-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 2rem;
+            align-items: center;
+            justify-items: center;
+            width: 100%;
+            padding: 0 2rem;
+        }
+        .login-left {
+            color: #000;
+            text-align: left;
+            padding-right: 0;
+            width: 100%;
+            max-width: 250px;
+        }
+        .login-left h2 {
+            font-size: 2.8rem;
+            font-weight: 900;
+            margin: 0;
+            line-height: 1.2;
+            text-shadow: none;
+        }
+        .login-left .text-black {
+            color: #000;
+        }
+        .login-left .text-blue {
+            color: #0a66c2;
+        }
+        .login-left .logo-large {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+        .login-gallery {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 0.5rem;
+            height: 350px;
+            width: 280px;
+            max-width: 100%;
+        }
+        .login-gallery img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .login-gallery .large {
+            grid-column: 1 / 2;
+            grid-row: 1 / 3;
+        }
+        .login-right {
+            display: flex;
+            justify-content: center;
+            padding-left: 0;
+            width: 100%;
+            max-width: 280px;
+        }
+        .login-right .auth-form {
+            width: 100%;
+            max-width: 380px;
+            margin: 0;
+        }
+        .auth-form h2 {
+            color: #000;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #000;
+            font-weight: 700;
+            text-shadow: none;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.3s;
+            background: white;
+            color: #333;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .form-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 2rem;
+        }
+        .sidebar {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .profile-card {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            margin: 0 auto 1rem;
+            object-fit: cover;
+            overflow: hidden;
+        }
+        .avatar-upload-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        .avatar-preview {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid #667eea;
+            overflow: hidden;
+            font-size: 3rem;
+        }
+        .profile-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        .profile-bio {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+        .profile-stat {
+            font-size: 0.9rem;
+            color: #667eea;
+            margin: 0.5rem 0;
+        }
+        .nav-menu {
+            list-style: none;
+            border-top: 2px solid #e0e0e0;
+            padding-top: 1rem;
+        }
+        .nav-menu li {
+            margin-bottom: 0.5rem;
+        }
+        .nav-button {
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            color: #333;
+            transition: all 0.3s;
+        }
+        .nav-button.active {
+            background: #667eea;
+            color: white;
+        }
+        .nav-button:hover {
+            background: #f0f0f0;
+        }
+        .nav-button.active:hover {
+            background: #5568d3;
+        }
+        .content {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .content h2 {
+            color: #FF3333;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-shadow: 
+                -2px -2px 0 #000,
+                2px -2px 0 #000,
+                -2px 2px 0 #000,
+                2px 2px 0 #000,
+                -2px 0px 0 #000,
+                2px 0px 0 #000,
+                0px -2px 0 #000,
+                0px 2px 0 #000;
+        }
+        .kits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .kit-card {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1rem;
+            transition: all 0.3s;
+        }
+        .kit-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+        }
+        .kit-image {
+            width: 100%;
+            height: 150px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 0.9rem;
+            overflow: hidden;
+            object-fit: cover;
+        }
+        .kit-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 0.5rem;
+            word-break: break-word;
+        }
+        .kit-grade {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+        .kit-status {
+            display: inline-block;
+            background: #51cf66;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-left: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .kit-status.unbuilt {
+            background: #ffa94d;
+        }
+        .kit-wiki {
+            font-size: 0.85rem;
+            color: #667eea;
+            margin: 0.75rem 0;
+            word-break: break-word;
+        }
+        .kit-wiki a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        .kit-wiki a:hover {
+            text-decoration: underline;
+        }
+        .kit-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .kit-actions button {
+            flex: 1;
+            padding: 0.5rem;
+            font-size: 0.9rem;
+        }
+        .share-section {
+            background: #f0f7ff;
+            border: 2px solid #667eea;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+        .share-section h3 {
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+        .share-link-box {
+            background: white;
+            border: 1px solid #e0e0e0;
+            padding: 1rem;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .share-link-box input {
+            flex: 1;
+            border: none;
+            background: none;
+            color: #667eea;
+            font-family: monospace;
+        }
+        .share-link-box input:focus {
+            outline: none;
+        }
+        .copy-btn {
+            padding: 0.5rem 1rem;
+        }
+        .public-profile {
+            max-width: 1000px;
+            margin: 2rem auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .profile-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        .profile-header .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            margin: 0 auto 1rem;
+            object-fit: cover;
+            overflow: hidden;
+        }
+        .profile-header .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .profile-header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        .profile-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+        .profile-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .stat {
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        .profile-content {
+            padding: 2rem;
+        }
+        .filter-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        .filter-tab {
+            padding: 0.5rem 1.5rem;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .filter-tab.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        .filter-tab:hover {
+            border-color: #667eea;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #999;
+        }
+        .empty-state h3 {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+        .edit-form {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            .sidebar {
+                position: static;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .kits-grid {
+                grid-template-columns: 1fr;
+            }
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .login-content {
+                grid-template-columns: 1fr;
+            }
+            .login-left {
+                text-align: center;
+                padding-right: 0;
+            }
+            .login-left h2 {
+                font-size: 2rem;
+            }
+            .login-right {
+                padding-left: 0;
+            }
+            .login-gallery {
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+    <script>
+        class GunplaTracker {
+            constructor() {
+                this.loadUsers();
+                this.currentUser = null;
+                this.currentPage = 'dashboard';
+                this.editingKit = null;
+                this.viewingProfile = null;
+                this.filterType = 'all';
+                this.filterGrade = 'all';
+                this.filterSeries = '';
+                this.lastActivityTime = null;
+                this.sessionTimeout = 10 * 60 * 1000; // 10 minutes in milliseconds
+                this.inactivityCheckInterval = null;
+                this.init();
+            }
+
+            loadUsers() {
+                const saved = localStorage.getItem('gunpla_users');
+                this.users = saved ? JSON.parse(saved) : {};
+            }
+
+            saveUsers() {
+                localStorage.setItem('gunpla_users', JSON.stringify(this.users));
+            }
+
+            saveUserData(userId, userData) {
+                this.users[userId] = userData;
+                this.saveUsers();
+                this.currentUser = { id: userId, ...userData };
+                this.render();
+            }
+
+            init() {
+                const params = new URLSearchParams(window.location.search);
+                if (params.has('profile')) {
+                    this.viewingProfile = params.get('profile');
+                }
+                this.render();
+            }
+
+            startSessionTimeout() {
+                this.lastActivityTime = Date.now();
+                
+                // Clear any existing interval
+                if (this.inactivityCheckInterval) {
+                    clearInterval(this.inactivityCheckInterval);
+                }
+                
+                // Check for inactivity every minute
+                this.inactivityCheckInterval = setInterval(() => {
+                    if (this.currentUser) {
+                        const timeSinceLastActivity = Date.now() - this.lastActivityTime;
+                        if (timeSinceLastActivity >= this.sessionTimeout) {
+                            alert('Your session has expired due to inactivity. Please log in again.');
+                            this.handleLogout();
+                        }
+                    }
+                }, 60000); // Check every 60 seconds
+                
+                // Add activity listeners
+                this.addActivityListeners();
+            }
+
+            resetActivityTimer() {
+                if (this.currentUser) {
+                    this.lastActivityTime = Date.now();
+                }
+            }
+
+            addActivityListeners() {
+                // Listen for user interactions
+                document.addEventListener('click', () => this.resetActivityTimer(), true);
+                document.addEventListener('keypress', () => this.resetActivityTimer(), true);
+                document.addEventListener('mousemove', () => this.resetActivityTimer(), true);
+                document.addEventListener('scroll', () => this.resetActivityTimer(), true);
+            }
+
+            handleRegister(e) {
+                if (e) {
+                    e.preventDefault();
+                }
+                
+                const username = document.querySelector('#reg-username')?.value?.trim();
+                const password = document.querySelector('#reg-password')?.value;
+                const email = document.querySelector('#reg-email')?.value;
+
+                if (!username || !password || !email) {
+                    alert('Please fill in all fields');
+                    return;
+                }
+
+                if (this.users[username]) {
+                    alert('Username already exists');
+                    return;
+                }
+
+                const newUser = {
+                    username,
+                    password,
+                    email,
+                    bio: '',
+                    avatar: '🤖',
+                    startDate: new Date().toISOString(),
+                    kits: [],
+                    nonGunplaKits: [],
+                    shareCode: Math.random().toString(36).substring(2, 8).toUpperCase()
+                };
+
+                this.users[username] = newUser;
+                this.saveUsers();
+                this.isRegisterMode = false;
+                alert('Registration successful! Please log in.');
+                this.render();
+            }
+
+            handleLogin(e) {
+                if (e) {
+                    e.preventDefault();
+                }
+                
+                const username = document.querySelector('#login-username')?.value;
+                const password = document.querySelector('#login-password')?.value;
+
+                const user = this.users[username];
+                if (!user || user.password !== password) {
+                    alert('Invalid username or password');
+                    return;
+                }
+
+                this.currentUser = { id: username, ...user };
+                this.currentPage = 'dashboard';
+                this.startSessionTimeout();
+                this.render();
+            }
+
+            handleLogout() {
+                if (this.inactivityCheckInterval) {
+                    clearInterval(this.inactivityCheckInterval);
+                }
+                this.currentUser = null;
+                this.currentPage = 'dashboard';
+                this.viewingProfile = null;
+                this.render();
+            }
+
+            handleAddKit(e) {
+                if (e) {
+                    e.preventDefault();
+                }
+
+                // Get form element
+                const kitForm = document.querySelector('form[data-form="add-kit"]');
+                if (!kitForm) {
+                    alert('Form not found');
+                    return;
+                }
+
+                // Get all form values directly from form
+                const type = kitForm.querySelector('select[name="type"]')?.value;
+                const name = kitForm.querySelector('input[name="name"]')?.value?.trim();
+                const grade = kitForm.querySelector('select[name="grade"]')?.value;
+                const series = kitForm.querySelector('input[name="series"]')?.value?.trim() || '';
+                const status = kitForm.querySelector('select[name="status"]')?.value;
+                const wikiUrl = kitForm.querySelector('input[name="wikiUrl"]')?.value?.trim() || '';
+                const image = kitForm.querySelector('input[name="image"]')?.value?.trim() || '';
+                const notes = kitForm.querySelector('textarea[name="notes"]')?.value?.trim() || '';
+                const purchaseDate = kitForm.querySelector('input[name="purchaseDate"]')?.value?.trim() || '';
+
+                // Validate required fields
+                if (!name) {
+                    alert('Kit Name is required');
+                    return;
+                }
+                if (!grade) {
+                    alert('Grade/Type is required');
+                    return;
+                }
+                if (!status) {
+                    alert('Status is required');
+                    return;
+                }
+
+                const isGunpla = type === 'gunpla';
+
+                const kit = {
+                    id: Date.now().toString(),
+                    name,
+                    grade,
+                    series,
+                    status,
+                    wikiUrl,
+                    image,
+                    notes,
+                    purchaseDate,
+                    type: isGunpla ? 'gunpla' : 'other'
+                };
+
+                const userData = { ...this.currentUser };
+                if (this.editingKit) {
+                    const index = isGunpla 
+                        ? userData.kits.findIndex(k => k.id === this.editingKit.id)
+                        : userData.nonGunplaKits.findIndex(k => k.id === this.editingKit.id);
+                    if (isGunpla && index >= 0) {
+                        userData.kits[index] = kit;
+                    } else if (!isGunpla && index >= 0) {
+                        userData.nonGunplaKits[index] = kit;
+                    }
+                    this.editingKit = null;
+                } else {
+                    if (isGunpla) {
+                        userData.kits.push(kit);
+                    } else {
+                        userData.nonGunplaKits.push(kit);
+                    }
+                }
+
+                this.saveUserData(this.currentUser.id, userData);
+                kitForm.reset();
+                alert('Kit saved successfully!');
+                this.setPage(isGunpla ? 'gunpla' : 'other');
+            }
+
+            handleDeleteKit(kitId, isGunpla = true) {
+                const userData = { ...this.currentUser };
+                if (isGunpla) {
+                    userData.kits = userData.kits.filter(k => k.id !== kitId);
+                } else {
+                    userData.nonGunplaKits = userData.nonGunplaKits.filter(k => k.id !== kitId);
+                }
+                this.saveUserData(this.currentUser.id, userData);
+            }
+
+            handleEditKit(kit, isGunpla = true) {
+                this.editingKit = { ...kit, isGunpla };
+                this.currentPage = 'addkit';
+                this.render();
+            }
+
+            handleUpdateProfile(e) {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const userData = { ...this.currentUser };
+                userData.bio = formData.get('bio');
+                
+                const fileInput = document.getElementById('profile-image-input');
+                if (fileInput && fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        userData.profileImage = event.target.result;
+                        this.saveUserData(this.currentUser.id, userData);
+                        alert('Profile updated successfully!');
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    this.saveUserData(this.currentUser.id, userData);
+                    alert('Profile updated successfully!');
+                }
+            }
+
+            copyShareLink() {
+                const shareUrl = `${window.location.href.split('?')[0]}?profile=${this.currentUser.shareCode}`;
+                navigator.clipboard.writeText(shareUrl);
+                alert('Share link copied to clipboard!');
+            }
+
+            getFilteredKits(kits) {
+                let filtered = kits;
+
+                // Filter by status
+                if (this.filterType === 'built') {
+                    filtered = filtered.filter(k => k.status === 'built');
+                } else if (this.filterType === 'unbuilt') {
+                    filtered = filtered.filter(k => k.status === 'unbuilt');
+                }
+
+                // Filter by grade
+                if (this.filterGrade !== 'all') {
+                    filtered = filtered.filter(k => k.grade === this.filterGrade);
+                }
+
+                // Filter by series
+                if (this.filterSeries.trim() !== '') {
+                    const searchTerm = this.filterSeries.toLowerCase();
+                    filtered = filtered.filter(k => k.series && k.series.toLowerCase().includes(searchTerm));
+                }
+
+                return filtered;
+            }
+
+            renderKitCard(kit, isGunpla = true) {
+                const statusColor = kit.status === 'built' ? '#51cf66' : '#ffa94d';
+                const statusText = kit.status === 'built' ? '✓ Built' : 'Unbuilt';
+                
+                return `
+                    <div class="kit-card">
+                        ${kit.image ? `<img src="${kit.image}" alt="${kit.name}" class="kit-image" onerror="this.style.display='none'">` : `<div class="kit-image">No image</div>`}
+                        <div class="kit-title">${kit.name}</div>
+                        <div>
+                            <span class="kit-grade">${kit.grade}</span>
+                            <span class="kit-status" style="background: ${statusColor}">
+                                ${statusText}
+                            </span>
+                        </div>
+                        ${kit.series ? `<div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;">${kit.series}</div>` : ''}
+                        ${kit.wikiUrl ? `<div class="kit-wiki"><a href="${kit.wikiUrl}" target="_blank" rel="noopener noreferrer">📖 View on Wiki</a></div>` : ''}
+                        ${kit.notes ? `<div style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">Note: ${kit.notes}</div>` : ''}
+                        ${!this.viewingProfile ? `
+                            <div class="kit-actions">
+                                <button class="btn btn-primary kit-edit-btn" data-kit-id="${kit.id}" data-kit-type="${isGunpla ? 'gunpla' : 'other'}" data-kit-data='${JSON.stringify(kit)}'>Edit</button>
+                                <button class="btn btn-danger kit-delete-btn" data-kit-id="${kit.id}" data-kit-type="${isGunpla ? 'gunpla' : 'other'}">Delete</button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+
+            renderLoginForm() {
+                return `
+                    <div class="container">
+                        <div class="navbar">
+                            <h1><img src="robot-logo.jpg" alt="Gunpla" class="navbar-logo"> Gunpla Collection Tracker</h1>
+                        </div>
+                        <div class="login-container">
+                            <div class="login-content">
+                                <div class="login-left">
+                                    <h2>
+                                        <span class="text-black">Build<br>Collect<br>Enjoy<br></span>
+                                        <span class="text-blue">Share.</span>
+                                    </h2>
+                                </div>
+                                <div class="login-gallery">
+                                    <img src="gundam4.jpg" alt="Gundam" class="large">
+                                    <img src="gundam1.jpg" alt="Gundam">
+                                    <img src="gundam5.jpg" alt="Gundam">
+                                </div>
+                                <div class="login-right">
+                                    <div class="auth-form">
+                                        <h2>Login</h2>
+                                        <div>
+                                            <div class="form-group">
+                                                <label>Username</label>
+                                                <input type="text" id="login-username" placeholder="Enter your username" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Password</label>
+                                                <input type="password" id="login-password" placeholder="Enter your password" required>
+                                            </div>
+                                            <div class="form-buttons">
+                                                <button class="btn btn-primary" data-action="login" style="width: 100%;">Login</button>
+                                            </div>
+                                            <div style="text-align: center; margin-top: 1rem;">
+                                                <button type="button" class="btn btn-secondary" data-action="toggle-auth" style="width: 100%;">
+                                                    Create Account
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderRegisterForm() {
+                return `
+                    <div class="container">
+                        <div class="navbar">
+                            <h1><img src="robot-logo.jpg" alt="Gunpla" class="navbar-logo"> Gunpla Collection Tracker</h1>
+                        </div>
+                        <div class="login-container">
+                            <div class="login-content">
+                                <div class="login-left">
+                                    <h2>
+                                        <span class="text-black">Build<br>Collect<br>Enjoy<br></span>
+                                        <span class="text-blue">Share.</span>
+                                    </h2>
+                                </div>
+                                <div class="login-gallery">
+                                    <img src="gundam4.jpg" alt="Gundam" class="large">
+                                    <img src="gundam1.jpg" alt="Gundam">
+                                    <img src="gundam5.jpg" alt="Gundam">
+                                </div>
+                                <div class="login-right">
+                                    <div class="auth-form">
+                                        <h2>Register</h2>
+                                        <div>
+                                            <div class="form-group">
+                                                <label>Username</label>
+                                                <input type="text" id="reg-username" placeholder="Choose a username" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Email</label>
+                                                <input type="email" id="reg-email" placeholder="your@email.com" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Password</label>
+                                                <input type="password" id="reg-password" placeholder="Choose a password" required>
+                                            </div>
+                                            <div class="form-buttons">
+                                                <button class="btn btn-primary" data-action="register" style="width: 100%;">Register</button>
+                                            </div>
+                                            <div style="text-align: center; margin-top: 1rem;">
+                                                <button type="button" class="btn btn-secondary" data-action="toggle-auth" style="width: 100%;">
+                                                    Back to Login
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            toggleAuthMode() {
+                this.isRegisterMode = !this.isRegisterMode;
+                this.render();
+            }
+
+            setPage(page) {
+                this.currentPage = page;
+                if (page === 'gunpla' || page === 'other') {
+                    this.filterType = 'all';
+                    // Don't reset grade and series filters - keep them for continuity
+                } else {
+                    // Reset all filters when leaving kit pages
+                    this.filterType = 'all';
+                    this.filterGrade = 'all';
+                    this.filterSeries = '';
+                }
+                this.editingKit = null;
+                this.render();
+            }
+
+            setFilter(type) {
+                this.filterType = type;
+                this.render();
+            }
+
+            setGradeFilter(grade) {
+                this.filterGrade = grade;
+                this.render();
+            }
+
+            setSeriesFilter(series) {
+                this.filterSeries = series;
+                this.render();
+            }
+
+            renderDashboard() {
+                const allKits = [...(this.currentUser.kits || []), ...(this.currentUser.nonGunplaKits || [])];
+                const builtKits = allKits.filter(k => k.status === 'built');
+                const unbuiltKits = allKits.filter(k => k.status === 'unbuilt');
+                const recentKits = allKits.sort((a, b) => parseInt(b.id) - parseInt(a.id)).slice(0, 6);
+
+                let recentKitsHtml = recentKits.map(kit => this.renderKitCard(kit, kit.type === 'gunpla')).join('');
+                if (recentKits.length === 0) {
+                    recentKitsHtml = '<div class="empty-state" style="grid-column: 1/-1;"><h3>No kits yet</h3><p>Add your first kit to get started!</p></div>';
+                }
+
+                return `
+                    <div class="content">
+                        <h2>📊 Dashboard</h2>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                            <div style="background: #f0f7ff; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 2rem; font-weight: bold; color: #667eea;">${allKits.length}</div>
+                                <div style="color: #666;">Total Kits</div>
+                            </div>
+                            <div style="background: #f0fef0; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 2rem; font-weight: bold; color: #51cf66;">${builtKits.length}</div>
+                                <div style="color: #666;">Built Kits</div>
+                            </div>
+                            <div style="background: #fffef0; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 2rem; font-weight: bold; color: #ffa94d;">${unbuiltKits.length}</div>
+                                <div style="color: #666;">Unbuilt Kits</div>
+                            </div>
+                        </div>
+                        <h3 style="color: #667eea; margin-top: 2rem; margin-bottom: 1rem;">Recent Kits</h3>
+                        <div class="kits-grid">
+                            ${recentKitsHtml}
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderGunplaPage() {
+                const kits = this.currentUser.kits || [];
+                const filtered = this.getFilteredKits(kits);
+                const builtCount = kits.filter(k => k.status === 'built').length;
+                const unbuiltCount = kits.filter(k => k.status === 'unbuilt').length;
+
+                // Get unique grades from all kits
+                const grades = ['all', ...new Set(kits.map(k => k.grade))].sort();
+
+                let kitsHtml = filtered.map(kit => this.renderKitCard(kit, true)).join('');
+                if (filtered.length === 0) {
+                    kitsHtml = `<div class="empty-state" style="grid-column: 1/-1;"><h3>No Gunpla kits match your filters</h3><p>Try adjusting your filters.</p></div>`;
+                }
+
+                return `
+                    <div class="content">
+                        <h2>🤖 Gunpla Kits</h2>
+                        <div class="filter-tabs">
+                            <button class="filter-tab ${this.filterType === 'all' ? 'active' : ''}" data-filter="all">All (${kits.length})</button>
+                            <button class="filter-tab ${this.filterType === 'built' ? 'active' : ''}" data-filter="built">Built (${builtCount})</button>
+                            <button class="filter-tab ${this.filterType === 'unbuilt' ? 'active' : ''}" data-filter="unbuilt">Unbuilt (${unbuiltCount})</button>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                            <div>
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #333;">Filter by Grade</label>
+                                <select id="grade-filter" style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 5px; font-size: 1rem; font-family: inherit;">
+                                    ${grades.map(g => `<option value="${g}" ${this.filterGrade === g ? 'selected' : ''}>${g === 'all' ? 'All Grades' : g}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #333;">Filter by Series</label>
+                                <input type="text" id="series-filter" placeholder="Search series..." value="${this.filterSeries}" style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 5px; font-size: 1rem; font-family: inherit;">
+                            </div>
+                        </div>
+                        <div class="kits-grid">
+                            ${kitsHtml}
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderOtherKitsPage() {
+                const kits = this.currentUser.nonGunplaKits || [];
+                const filtered = this.getFilteredKits(kits);
+                const builtCount = kits.filter(k => k.status === 'built').length;
+                const unbuiltCount = kits.filter(k => k.status === 'unbuilt').length;
+
+                // Get unique grades from all kits
+                const grades = ['all', ...new Set(kits.map(k => k.grade))].sort();
+
+                let kitsHtml = filtered.map(kit => this.renderKitCard(kit, false)).join('');
+                if (filtered.length === 0) {
+                    kitsHtml = `<div class="empty-state" style="grid-column: 1/-1;"><h3>No model kits match your filters</h3><p>Try adjusting your filters.</p></div>`;
+                }
+
+                return `
+                    <div class="content">
+                        <h2>📦 Other Model Kits</h2>
+                        <div class="filter-tabs">
+                            <button class="filter-tab ${this.filterType === 'all' ? 'active' : ''}" data-filter="all">All (${kits.length})</button>
+                            <button class="filter-tab ${this.filterType === 'built' ? 'active' : ''}" data-filter="built">Built (${builtCount})</button>
+                            <button class="filter-tab ${this.filterType === 'unbuilt' ? 'active' : ''}" data-filter="unbuilt">Unbuilt (${unbuiltCount})</button>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                            <div>
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #333;">Filter by Grade</label>
+                                <select id="grade-filter" style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 5px; font-size: 1rem; font-family: inherit;">
+                                    ${grades.map(g => `<option value="${g}" ${this.filterGrade === g ? 'selected' : ''}>${g === 'all' ? 'All Grades' : g}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #333;">Filter by Series</label>
+                                <input type="text" id="series-filter" placeholder="Search series..." value="${this.filterSeries}" style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 5px; font-size: 1rem; font-family: inherit;">
+                            </div>
+                        </div>
+                        <div class="kits-grid">
+                            ${kitsHtml}
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderAddKitPage() {
+                const editing = this.editingKit;
+                const gradeOptions = ['PG', 'MG', 'HG', 'RG', 'HGUC', 'SD', 'RE/100', 'Other'];
+                
+                return `
+                    <div class="content">
+                        <h2>${editing ? '✏️ Edit Kit' : '➕ Add New Kit'}</h2>
+                        <div class="edit-form">
+                            <form data-form="add-kit">
+                                <div class="form-group">
+                                    <label>Kit Type</label>
+                                    <select name="type" required>
+                                        <option value="gunpla" ${!editing || editing.type === 'gunpla' ? 'selected' : ''}>Gunpla (Gundam Kit)</option>
+                                        <option value="other" ${editing && editing.type === 'other' ? 'selected' : ''}>Other Model Kit</option>
+                                    </select>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Kit Name *</label>
+                                        <input type="text" name="name" placeholder="e.g., RX-78-2 Gundam" value="${editing ? editing.name : ''}" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Grade/Type *</label>
+                                        <select name="grade" required>
+                                            ${gradeOptions.map(g => `<option value="${g}" ${editing && editing.grade === g ? 'selected' : ''}>${g}</option>`).join('')}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Series</label>
+                                        <input type="text" name="series" placeholder="e.g., Mobile Suit Gundam" value="${editing ? editing.series : ''}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Status *</label>
+                                        <select name="status" required>
+                                            <option value="unbuilt" ${!editing || editing.status === 'unbuilt' ? 'selected' : ''}>Unbuilt</option>
+                                            <option value="built" ${editing && editing.status === 'built' ? 'selected' : ''}>Built</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group full">
+                                    <label>Gundam Wiki URL</label>
+                                    <div style="display: flex; gap: 0.5rem; align-items: flex-end;">
+                                        <input type="url" name="wikiUrl" placeholder="https://gunpla.fandom.com/wiki/MG_RX-78-2_Gundam" value="${editing ? (editing.wikiUrl || '') : ''}" style="flex: 1;">
+                                        <button type="button" class="btn btn-secondary" id="search-wiki-btn" style="white-space: nowrap;">🔍 Search Wiki</button>
+                                    </div>
+                                    <p style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">💡 Click "Search Wiki" to find the exact URL for your kit</p>
+                                </div>
+                                <div class="form-group full">
+                                    <label>Image URL</label>
+                                    <input type="url" name="image" placeholder="https://example.com/image.jpg" value="${editing ? (editing.image || '') : ''}">
+                                </div>
+                                <div class="form-group full">
+                                    <label>Purchase Date</label>
+                                    <input type="date" name="purchaseDate" value="${editing ? (editing.purchaseDate || '') : ''}">
+                                </div>
+                                <div class="form-group full">
+                                    <label>Notes</label>
+                                    <textarea name="notes" placeholder="Add any notes about this kit...">${editing ? (editing.notes || '') : ''}</textarea>
+                                </div>
+                                <div class="form-buttons">
+                                    <button type="submit" class="btn btn-success">
+                                        ${editing ? '💾 Update Kit' : '➕ Add Kit'}
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" data-page="gunpla">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderProfilePage() {
+                return `
+                    <div class="content">
+                        <h2>👤 Edit Profile</h2>
+                        <div class="edit-form">
+                            <form data-form="profile">
+                                <div class="form-group">
+                                    <label>Profile Picture</label>
+                                    <div class="avatar-upload-section">
+                                        <div class="avatar-preview">
+                                            ${this.currentUser.profileImage ? 
+                                                `<img src="${this.currentUser.profileImage}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">` :
+                                                `<span style="font-size: 3rem;">📷</span>`
+                                            }
+                                        </div>
+                                        <input type="file" name="profileImage" id="profile-image-input" accept="image/*" style="display: none;">
+                                        <button type="button" class="btn btn-secondary" id="upload-btn">Choose Image</button>
+                                    </div>
+                                </div>
+                                <div class="form-group full">
+                                    <label>Bio</label>
+                                    <textarea name="bio" placeholder="Tell others about yourself and your collection...">${this.currentUser.bio || ''}</textarea>
+                                </div>
+                                <div style="background: #f0f7ff; padding: 1rem; border-radius: 5px; margin-bottom: 1rem;">
+                                    <p style="margin: 0; font-size: 0.9rem; color: #667eea;">
+                                        <strong>Member since:</strong> ${new Date(this.currentUser.startDate).toLocaleDateString()}
+                                    </p>
+                                </div>
+                                <div class="form-buttons">
+                                    <button type="submit" class="btn btn-success">💾 Save Profile</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderSharePage() {
+                const shareUrl = `${window.location.href.split('?')[0]}?profile=${this.currentUser.shareCode}`;
+                return `
+                    <div class="content">
+                        <h2>🔗 Share Your Collection</h2>
+                        <div class="share-section">
+                            <h3>Share Your Public Profile</h3>
+                            <p>Share this link to let others view your Gunpla collection:</p>
+                            <div class="share-link-box">
+                                <input type="text" readonly value="${shareUrl}">
+                                <button class="btn btn-primary copy-btn" data-action="copy-share">📋 Copy</button>
+                            </div>
+                            <p style="font-size: 0.9rem; color: #666; margin-top: 1rem;">
+                                Your unique share code: <strong>${this.currentUser.shareCode}</strong>
+                            </p>
+                            <p style="font-size: 0.9rem; color: #666;">
+                                ✓ Your profile is public and anyone with the link can view your collection
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderPublicProfile() {
+                const profile = Object.values(this.users).find(u => u.shareCode === this.viewingProfile);
+                
+                if (!profile) {
+                    return `
+                        <div class="container">
+                            <div class="navbar">
+                                <h1><img src="robot-logo.jpg" alt="Gunpla" class="navbar-logo"> Gunpla Tracker</h1>
+                                <button class="btn btn-secondary" data-action="back-profile">← Back</button>
+                            </div>
+                            <div class="public-profile">
+                                <div class="profile-header">
+                                    <h1>Profile not found</h1>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                const allKits = [...profile.kits, ...profile.nonGunplaKits];
+                const builtKits = allKits.filter(k => k.status === 'built');
+
+                let kitsHtml = allKits.map(kit => this.renderKitCard(kit, kit.type === 'gunpla')).join('');
+                if (allKits.length === 0) {
+                    kitsHtml = '<div class="empty-state" style="grid-column: 1/-1;"><h3>No kits yet</h3></div>';
+                }
+
+                return `
+                    <div class="container">
+                        <div class="navbar">
+                            <h1><img src="robot-logo.jpg" alt="Gunpla" class="navbar-logo"> Gunpla Tracker</h1>
+                            <button class="btn btn-secondary" data-action="back-profile">← Back</button>
+                        </div>
+                        <div class="public-profile">
+                            <div class="profile-header">
+                                <div class="avatar">
+                                    ${profile.profileImage ? 
+                                        `<img src="${profile.profileImage}" alt="Profile">` :
+                                        `<span style="font-size: 3rem;">📷</span>`
+                                    }
+                                </div>
+                                <h1>${profile.username}</h1>
+                                ${profile.bio ? `<p>${profile.bio}</p>` : ''}
+                                <p>Started collecting: ${new Date(profile.startDate).toLocaleDateString()}</p>
+                                <div class="profile-stats">
+                                    <div class="stat">
+                                        <div class="stat-number">${allKits.length}</div>
+                                        <div class="stat-label">Total Kits</div>
+                                    </div>
+                                    <div class="stat">
+                                        <div class="stat-number">${builtKits.length}</div>
+                                        <div class="stat-label">Built</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="profile-content">
+                                <h2>📦 Collection</h2>
+                                <div class="kits-grid">
+                                    ${kitsHtml}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderDashboardContent() {
+                if (this.currentPage === 'dashboard') return this.renderDashboard();
+                if (this.currentPage === 'gunpla') return this.renderGunplaPage();
+                if (this.currentPage === 'other') return this.renderOtherKitsPage();
+                if (this.currentPage === 'addkit') return this.renderAddKitPage();
+                if (this.currentPage === 'profile') return this.renderProfilePage();
+                if (this.currentPage === 'share') return this.renderSharePage();
+                return this.renderDashboard();
+            }
+
+            renderDashboardPage() {
+                const allKits = [...(this.currentUser.kits || []), ...(this.currentUser.nonGunplaKits || [])];
+                const builtKits = allKits.filter(k => k.status === 'built');
+
+                return `
+                    <div class="container">
+                        <div class="navbar">
+                            <h1><img src="robot-logo.jpg" alt="Gunpla" class="navbar-logo"> Gunpla Collection Tracker</h1>
+                            <div class="navbar-buttons">
+                                <span style="color: #667eea; font-weight: bold;">Welcome, ${this.currentUser.username}!</span>
+                                <button class="btn btn-danger" data-action="logout">Logout</button>
+                            </div>
+                        </div>
+                        <div class="dashboard">
+                            <div class="sidebar">
+                                <div class="profile-card">
+                                    <div class="profile-avatar">
+                                        ${this.currentUser.profileImage ? 
+                                            `<img src="${this.currentUser.profileImage}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">` :
+                                            `<span style="font-size: 2rem;">📷</span>`
+                                        }
+                                    </div>
+                                    <div class="profile-name">${this.currentUser.username}</div>
+                                    <div class="profile-bio">${this.currentUser.bio || 'No bio yet'}</div>
+                                    <div class="profile-stat">📅 Collecting since ${new Date(this.currentUser.startDate).toLocaleDateString()}</div>
+                                    <div class="profile-stat">📦 Total: ${allKits.length} kits</div>
+                                    <div class="profile-stat">✓ Built: ${builtKits.length}</div>
+                                </div>
+                                <ul class="nav-menu">
+                                    <li><button class="nav-button ${this.currentPage === 'dashboard' ? 'active' : ''}" data-page="dashboard">📊 Dashboard</button></li>
+                                    <li><button class="nav-button ${this.currentPage === 'gunpla' ? 'active' : ''}" data-page="gunpla">🤖 Gunpla Kits</button></li>
+                                    <li><button class="nav-button ${this.currentPage === 'other' ? 'active' : ''}" data-page="other">📦 Other Kits</button></li>
+                                    <li><button class="nav-button ${this.currentPage === 'addkit' ? 'active' : ''}" data-page="addkit">➕ Add Kit</button></li>
+                                    <li><button class="nav-button ${this.currentPage === 'profile' ? 'active' : ''}" data-page="profile">👤 Profile</button></li>
+                                    <li><button class="nav-button ${this.currentPage === 'share' ? 'active' : ''}" data-page="share">🔗 Share</button></li>
+                                </ul>
+                            </div>
+                            ${this.renderDashboardContent()}
+                        </div>
+                    </div>
+                `;
+            }
+
+            updateBackground() {
+                const body = document.body;
+                if (!this.currentUser) {
+                    // Login page: use plain color
+                    body.style.backgroundImage = "none";
+                    body.style.backgroundColor = "#f0f2f5";
+                } else {
+                    // Dashboard: use collage background
+                    body.style.backgroundImage = "url('login-collage-background.jpg')";
+                    body.style.backgroundColor = "#667eea";
+                }
+            }
+
+            render() {
+                const app = document.getElementById('app');
+                
+                if (this.viewingProfile) {
+                    app.innerHTML = this.renderPublicProfile();
+                    const backBtn = app.querySelector('button[data-action="back-profile"]');
+                    if (backBtn) {
+                        backBtn.addEventListener('click', () => {
+                            this.viewingProfile = null;
+                            this.render();
+                        });
+                    }
+                } else if (!this.currentUser) {
+                    app.innerHTML = this.isRegisterMode ? this.renderRegisterForm() : this.renderLoginForm();
+                    this.attachAuthListeners();
+                } else {
+                    app.innerHTML = this.renderDashboardPage();
+                    this.attachDashboardListeners();
+                }
+                
+                // Update background based on login state
+                this.updateBackground();
+            }
+
+            attachAuthListeners() {
+                const loginBtn = document.querySelector('button[data-action="login"]');
+                const registerBtn = document.querySelector('button[data-action="register"]');
+                const toggleBtn = document.querySelector('button[data-action="toggle-auth"]');
+
+                if (loginBtn) {
+                    loginBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.handleLogin(null);
+                    });
+                }
+
+                if (registerBtn) {
+                    registerBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.handleRegister(null);
+                    });
+                }
+
+                if (toggleBtn) {
+                    toggleBtn.addEventListener('click', () => {
+                        this.toggleAuthMode();
+                    });
+                }
+            }
+
+            attachDashboardListeners() {
+                // Logout button
+                const logoutBtn = document.querySelector('button[data-action="logout"]');
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', () => this.handleLogout());
+                }
+
+                // Add Kit form submit
+                const kitForm = document.querySelector('form[data-form="add-kit"]');
+                if (kitForm) {
+                    kitForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.handleAddKit(e);
+                    });
+                    
+                    // Also add direct click handler to submit button
+                    const submitBtn = kitForm.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            this.handleAddKit(e);
+                        });
+                    }
+
+                    // Auto-populate Wiki URL based on Kit Name and Grade
+                    const kitNameInput = kitForm.querySelector('input[name="name"]');
+                    const gradeSelect = kitForm.querySelector('select[name="grade"]');
+                    const wikiUrlInput = kitForm.querySelector('input[name="wikiUrl"]');
+
+                    const autoPopulateWikiUrl = () => {
+                        const kitName = kitNameInput?.value?.trim();
+                        const grade = gradeSelect?.value;
+
+                        if (kitName && grade && wikiUrlInput) {
+                            // Format kit name for URL (replace spaces and special chars)
+                            const formattedName = kitName
+                                .replace(/\s+/g, '_')
+                                .replace(/[()]/g, '')
+                                .trim();
+                            
+                            const newWikiUrl = `https://gunpla.fandom.com/wiki/${grade}_${formattedName}`;
+                            
+                            // Update if field is empty OR if it contains gunpla.fandom.com (auto-generated)
+                            if (!wikiUrlInput.value || wikiUrlInput.value.includes('gunpla.fandom.com')) {
+                                wikiUrlInput.value = newWikiUrl;
+                            }
+                        }
+                    };
+
+                    if (kitNameInput) {
+                        kitNameInput.addEventListener('blur', autoPopulateWikiUrl);
+                        kitNameInput.addEventListener('change', autoPopulateWikiUrl);
+                    }
+
+                    if (gradeSelect) {
+                        gradeSelect.addEventListener('change', autoPopulateWikiUrl);
+                    }
+
+                    // Search Wiki button
+                    const searchWikiBtn = kitForm.querySelector('#search-wiki-btn');
+                    if (searchWikiBtn) {
+                        searchWikiBtn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            const kitName = kitNameInput?.value?.trim();
+                            const grade = gradeSelect?.value;
+                            
+                            if (kitName) {
+                                const searchQuery = `${grade} ${kitName}`.trim();
+                                const wikiSearchUrl = `https://gunpla.fandom.com/wiki/Special:Search?query=${encodeURIComponent(searchQuery)}`;
+                                window.open(wikiSearchUrl, '_blank');
+                            } else {
+                                alert('Please enter a Kit Name first');
+                            }
+                        });
+                    }
+                }
+
+                // Profile form
+                const profileForm = document.querySelector('form[data-form="profile"]');
+                if (profileForm) {
+                    profileForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.handleUpdateProfile(e);
+                    });
+                    
+                    // Handle profile image upload
+                    const uploadBtn = profileForm.querySelector('#upload-btn');
+                    const fileInput = profileForm.querySelector('#profile-image-input');
+                    const previewDiv = profileForm.querySelector('.avatar-preview');
+                    
+                    if (uploadBtn && fileInput) {
+                        uploadBtn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            fileInput.click();
+                        });
+                        
+                        fileInput.addEventListener('change', (e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                                const reader = new FileReader();
+                                reader.onload = (event) => {
+                                    if (previewDiv) {
+                                        previewDiv.innerHTML = `<img src="${event.target.result}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">`;
+                                    }
+                                };
+                                reader.readAsDataURL(file);
+                            }
+                        });
+                    }
+                }
+
+                // Share copy button
+                const copyBtn = document.querySelector('button[data-action="copy-share"]');
+                if (copyBtn) {
+                    copyBtn.addEventListener('click', () => this.copyShareLink());
+                }
+
+                // Nav buttons
+                document.querySelectorAll('button[data-page]').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.setPage(btn.dataset.page);
+                    });
+                });
+
+                // Filter buttons
+                document.querySelectorAll('button[data-filter]').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.setFilter(btn.dataset.filter);
+                    });
+                });
+
+                // Grade filter
+                const gradeFilter = document.querySelector('#grade-filter');
+                if (gradeFilter) {
+                    gradeFilter.addEventListener('change', (e) => {
+                        this.setGradeFilter(e.target.value);
+                    });
+                }
+
+                // Series filter
+                const seriesFilter = document.querySelector('#series-filter');
+                if (seriesFilter) {
+                    seriesFilter.addEventListener('input', (e) => {
+                        this.setSeriesFilter(e.target.value);
+                    });
+                }
+
+                // Kit edit buttons
+                document.querySelectorAll('.kit-edit-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const kitData = JSON.parse(btn.dataset.kitData);
+                        const isGunpla = btn.dataset.kitType === 'gunpla';
+                        this.handleEditKit(kitData, isGunpla);
+                    });
+                });
+
+                // Kit delete buttons
+                document.querySelectorAll('.kit-delete-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const kitId = btn.dataset.kitId;
+                        const isGunpla = btn.dataset.kitType === 'gunpla';
+                        this.handleDeleteKit(kitId, isGunpla);
+                    });
+                });
+            }
+        }
+
+        const tracker = new GunplaTracker();
+    </script>
+</body>
+</html>
